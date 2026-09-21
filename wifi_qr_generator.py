@@ -19,6 +19,10 @@ PASSWORD_LENGTH = 10
 PASSWORD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789"
 SERIAL_PATTERN = re.compile(r"^[A-Z0-9]{5}$")
 WIFI_ESCAPE_PATTERN = re.compile(r"([\\;,:\"])")
+DEFAULT_WINDOW_WIDTH = 1180
+DEFAULT_WINDOW_HEIGHT = 960
+MIN_WINDOW_WIDTH = 980
+MIN_WINDOW_HEIGHT = 820
 
 
 def generate_password(length: int = PASSWORD_LENGTH) -> str:
@@ -68,9 +72,8 @@ class WifiQrGenerator(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.title(APP_TITLE)
-        self.geometry("1080x720")
-        self.minsize(900, 620)
         self.configure(bg=self.COLORS["background"])
+        self._set_initial_window_geometry()
 
         self.model_name_var = tk.StringVar(value=DEFAULT_MODEL_NAME)
         self.serial_number_var = tk.StringVar(value=DEFAULT_SERIAL_NUMBER)
@@ -89,6 +92,23 @@ class WifiQrGenerator(tk.Tk):
         self._build_ui()
         self._bind_events()
         self._refresh_qr()
+
+    def _set_initial_window_geometry(self) -> None:
+        """Open at a comfortable size without exceeding the current screen."""
+
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        available_width = max(800, screen_width - 80)
+        available_height = max(600, screen_height - 100)
+        width = min(DEFAULT_WINDOW_WIDTH, available_width)
+        height = min(DEFAULT_WINDOW_HEIGHT, available_height)
+        self.minsize(
+            min(MIN_WINDOW_WIDTH, width),
+            min(MIN_WINDOW_HEIGHT, height),
+        )
+        left = max((screen_width - width) // 2, 0)
+        top = max((screen_height - height) // 2, 0)
+        self.geometry(f"{width}x{height}+{left}+{top}")
 
     def _configure_styles(self) -> None:
         style = ttk.Style(self)
